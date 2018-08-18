@@ -1,4 +1,5 @@
 #include <cstdio>
+#include <omp.h>
 
 using namespace std;
 
@@ -9,57 +10,67 @@ int distance[MAX][MAX];
 
 int nodesCount;
 
-void Initialize(){
-    for (int i=0;i<MAX;++i){
-        for (int j=0;j<MAX;++j){
-            distance[i][j]=NOT_CONNECTED;
+void initialize() {
+    for (int i = 0; i < MAX; ++i) {
+        for (int j = 0; j < MAX; ++j) {
+            distance[i][j] = NOT_CONNECTED;
 
         }
-        distance[i][i]=0;
+        distance[i][i] = 0;
     }
 }
 
 
 int main(int argc, char** argv){
 
-    if(argc!=2){
+    if (argc != 2) {
         printf("The path to the input file is not specified as a parameter.\n");
         return -1;
     }
     FILE *in_file  = fopen(argv[1], "r");
-    if (in_file  == NULL)
+    if (in_file == NULL)
     {
         printf("Can't open file for reading.\n");
         return -1;
     }
 
-
-
-    Initialize();
+    initialize();
 
     fscanf(in_file,"%d", &nodesCount);
 
     int a, b, c;
-    while (fscanf(in_file,"%d %d %d", &a, &b, &c)!= EOF) {
+    while (fscanf(in_file, "%d %d %d", &a, &b, &c) != EOF) {
         if (a > nodesCount || b > nodesCount) {
             printf("Vertex index out of boundary.");
             return -1;
         }
-        distance[a][b]=c;
+        distance[a][b] = c;
     }
 
     //Floyd-Warshall
-    for (int k=1; k<=nodesCount; ++k) {
-        for (int i=1; i<=nodesCount; ++i) {
+	double startTime = omp_get_wtime();
+	int numthreads = 16;
+	int i, j, k;
+	bool printed = false;
+    #pragma omp parallel for default(none) shared(distance, nodesCount) private(i, j, k, printed) num_threads(numthreads)
+    for (k = 1; k <= nodesCount; ++k) {
+		if (!printed) {
+			printf("%d", omp_get_thread_num());
+			printed = true;
+		}
+        for (i = 1; i <= nodesCount; ++i) {
             if (distance[i][k] != NOT_CONNECTED) {
-                for (int j=1; j <= nodesCount; ++j) {
-                    if (distance[k][j]!=NOT_CONNECTED && (distance[i][j]==NOT_CONNECTED || distance[i][k] +distance[k][j]<distance[i][j])) {
-                        distance[i][j]=distance[i][k]+distance[k][j];
+                for (j = 1; j <= nodesCount; ++j) {
+                    if (distance[k][j] != NOT_CONNECTED && (distance[i][j] == NOT_CONNECTED || distance[i][k] + distance[k][j] < distance[i][j])) {
+                        distance[i][j] = distance[i][k] + distance[k][j];
                     }
                 }
             }
         }
     }
+
+	double now = omp_get_wtime();
+	printf("Took %fms to calculate distances\n", (now - startTime) * 1000);
 
     int diameter=-1;
 
@@ -72,6 +83,9 @@ int main(int argc, char** argv){
             }
         }
     }
+
+	now = omp_get_wtime();
+	printf("Took %fms to find the most distant\n", (now - startTime) * 1000);
 
     printf("%d\n", diameter);
 
