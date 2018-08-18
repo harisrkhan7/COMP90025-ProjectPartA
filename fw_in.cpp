@@ -56,6 +56,8 @@ int main(int argc, char** argv){
         distance[a][b] = c;
     }
 
+	printf("%d threads and %d nodes:\n", numthreads, nodesCount);
+
     //Floyd-Warshall
 	double startTime = omp_get_wtime();
 	int i, j, k;
