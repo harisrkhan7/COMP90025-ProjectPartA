@@ -1,0 +1,1 @@
+clang -Xpreprocessor -fopenmp -lomp -lc++ <file>
