@@ -28,13 +28,13 @@ int main(int argc, char** argv){
         printf("The path to the input file is not specified as a parameter.\n");
         return -1;
     }
-	if (argc == 3) {
-		numthreads = atoi(argv[2]);
-		if (numthreads < 1) {
-			printf("Very cheeky!\n");
-			numthreads = 1;
-		}
-	}
+    if (argc == 3) {
+        numthreads = atoi(argv[2]);
+        if (numthreads < 1) {
+            printf("Very cheeky!\n");
+            numthreads = 1;
+        }
+    }
 
     FILE *in_file  = fopen(argv[1], "r");
     if (in_file == NULL)
@@ -56,40 +56,33 @@ int main(int argc, char** argv){
         distance[a][b] = c;
     }
 
-	printf("%d threads and %d nodes:\n", numthreads, nodesCount);
-
     //Floyd-Warshall
-	double startTime = omp_get_wtime();
-	int i, j, k;
-    #pragma omp parallel for default(none) shared(distance, nodesCount) private(i, j, k) num_threads(numthreads)
+    double startTime = omp_get_wtime();
+    int i, j, k;
     for (k = 1; k <= nodesCount; ++k) {
+        #pragma omp parallel for schedule(dynamic) private(i, j) num_threads(numthreads)
         for (i = 1; i <= nodesCount; ++i) {
             for (j = 1; j <= nodesCount; ++j) {
-            	if (distance[i][k] != NOT_CONNECTED) {
-                    if (distance[k][j] != NOT_CONNECTED && (distance[i][j] == NOT_CONNECTED || distance[i][k] + distance[k][j] < distance[i][j])) {
+                    if (distance [i][k] != NOT_CONNECTED && distance[k][j] != NOT_CONNECTED && (distance[i][j] == NOT_CONNECTED || distance[i][k] + distance[k][j] < distance[i][j])) {
                         distance[i][j] = distance[i][k] + distance[k][j];
                     }
-                }
             }
         }
     }
 
-    int diameter=-1;
+    int diameter = -1;
 
     //look for the most distant pair
-    for (int i=1;i<=nodesCount;++i){
-        for (int j=1;j<=nodesCount;++j){
-            if (diameter<distance[i][j]){
-                diameter=distance[i][j];
+    for (int i=1; i <= nodesCount; ++i) {
+        for (int j = 1; j <= nodesCount; ++j) {
+            if (diameter < distance[i][j]) {
+                diameter = distance[i][j];
                 //printf("%d-%d-%d\n", i, diameter, j);
             }
         }
     }
-
-	double now = omp_get_wtime();
-	printf("Took %fms to find the most distant\n", (now - startTime) * 1000);
-
-    printf("%d\n", diameter);
+    double now = omp_get_wtime();
+    printf("T: %d, N: %d, took %fms to find diameter: %d\n", numthreads, nodesCount, (now - startTime) * 1000, diameter);
 
     return 0;
 
