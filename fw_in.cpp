@@ -64,8 +64,8 @@ int main(int argc, char** argv){
     #pragma omp parallel for default(none) shared(distance, nodesCount) private(i, j, k) num_threads(numthreads)
     for (k = 1; k <= nodesCount; ++k) {
         for (i = 1; i <= nodesCount; ++i) {
-            if (distance[i][k] != NOT_CONNECTED) {
-                for (j = 1; j <= nodesCount; ++j) {
+            for (j = 1; j <= nodesCount; ++j) {
+            	if (distance[i][k] != NOT_CONNECTED) {
                     if (distance[k][j] != NOT_CONNECTED && (distance[i][j] == NOT_CONNECTED || distance[i][k] + distance[k][j] < distance[i][j])) {
                         distance[i][j] = distance[i][k] + distance[k][j];
                     }
