@@ -60,7 +60,7 @@ int main(int argc, char** argv){
     double startTime = omp_get_wtime();
     int i, j, k;
     for (k = 1; k <= nodesCount; ++k) {
-        #pragma omp parallel for schedule(dynamic) private(i, j) num_threads(numthreads)
+        #pragma omp parallel for schedule(static) private(i, j) num_threads(numthreads)
         for (i = 1; i <= nodesCount; ++i) {
             for (j = 1; j <= nodesCount; ++j) {
                     if (distance [i][k] != NOT_CONNECTED && distance[k][j] != NOT_CONNECTED && (distance[i][j] == NOT_CONNECTED || distance[i][k] + distance[k][j] < distance[i][j])) {
