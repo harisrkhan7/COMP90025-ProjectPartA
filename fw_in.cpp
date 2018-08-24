@@ -28,13 +28,13 @@ int main(int argc, char** argv){
         printf("The path to the input file is not specified as a parameter.\n");
         return -1;
     }
-    if (argc == 3) {
-        numthreads = atoi(argv[2]);
-        if (numthreads < 1) {
-            printf("Very cheeky!\n");
-            numthreads = 1;
-        }
-    }
+    //if (argc == 3) {
+    //    numthreads = atoi(argv[2]);
+    //    if (numthreads < 1) {
+    //        printf("Very cheeky!\n");
+    //        numthreads = 1;
+    //    }
+    //}
 
     FILE *in_file  = fopen(argv[1], "r");
     if (in_file == NULL)
@@ -57,11 +57,19 @@ int main(int argc, char** argv){
     }
 
     //Floyd-Warshall
-    double startTime = omp_get_wtime();
     int i, j, k;
+
+
+    double startTime = omp_get_wtime();
+    if (i >= 100) {
+		numthreads = 8;
+	} else if (i >= 50) {
+		numthreads = 4;
+	}
     for (k = 1; k <= nodesCount; ++k) {
         #pragma omp parallel for schedule(dynamic) private(i, j) num_threads(numthreads)
         for (i = 1; i <= nodesCount; ++i) {
+			if (distance[i][k])
             for (j = 1; j <= nodesCount; ++j) {
                     if (distance [i][k] != NOT_CONNECTED && distance[k][j] != NOT_CONNECTED && (distance[i][j] == NOT_CONNECTED || distance[i][k] + distance[k][j] < distance[i][j])) {
                         distance[i][j] = distance[i][k] + distance[k][j];
@@ -82,7 +90,8 @@ int main(int argc, char** argv){
         }
     }
     double now = omp_get_wtime();
-    printf("%d,%d,%f,%d\n", numthreads, nodesCount, (now - startTime) * 1000, diameter);
+    //printf("%d,%d,%f,%d\n", numthreads, nodesCount, (now - startTime) * 1000, diameter);
+	printf("%d %.16g\n", diameter, (now - startTime));
 
     return 0;
 
