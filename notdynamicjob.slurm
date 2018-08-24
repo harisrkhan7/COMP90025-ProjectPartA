@@ -12,7 +12,7 @@ gcc -fopenmp notdynamic_fw_in.cpp -o our_static_program
 
 echo "Threads,Nodes,Time,Diameter,STATIC"
 
-for nodes in 5 10 20 50 100 200 500 750 1000 1250 1500 2000 3000 5000 6000 7000 8000 10000
+for nodes in 5 10 20 50 100 200 500 750 1000 1250 1500 2000 3000 5000 7500
 do
 for threads in 1 2 3 4 5 6 7 8 12 16 24 32 64 128 256 512 1024
 do
